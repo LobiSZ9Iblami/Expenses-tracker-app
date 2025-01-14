@@ -1,0 +1,29 @@
+{% extends 'users/base.html' %}
+
+
+{% block title %}
+Navigation
+{% endblock %}
+
+
+
+
+{% block body%}
+
+<aside>
+<!--    <ul>-->
+<!--        {% for p in exp %}-->
+<!--            <li>{{ p }}</li>-->
+<!--        {% endfor %}-->
+<!--        {{ exp.model_name }}-->
+<!--    </ul>-->
+<!--    <a href="{% url 'tracker:expense' %}" style="text-decoration: none; color: black;">Expenses</a>-->
+    <ul>
+        {% for p in data %}
+            <li><a href="{% url p.url %}">{{ p.name }}</a></li>
+        {% endfor %}
+    </ul>
+
+</aside>
+
+{% endblock %}

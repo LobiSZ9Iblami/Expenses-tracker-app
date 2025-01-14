@@ -1,0 +1,27 @@
+{% extends 'users/base.html' %}
+
+
+{% block title %}
+Edit expenses
+{% endblock %}
+
+
+
+{% block body%}
+<form method="post">
+    <h2>Edit expense</h2>
+    {% csrf_token %}
+    {{ form.as_table }}
+    <p><button type="submit" name="action" value="edit_expense">Save changes</button></p>
+</form>
+
+<form method="post" action="{% url 'tracker:edit_expense' pk=exp.pk %}">
+    {% csrf_token %}
+    <p><button type="submit" name="action" value="delete_expense">Irretrievably delete</button></p>
+</form>
+
+<form method="post" action="{% url 'tracker:edit_expense' pk=exp.pk %}">
+    {% csrf_token %}
+    <p><button type="submit" name="action" value="archive_expense">Archive</button></p>
+</form>
+{% endblock %}

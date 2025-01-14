@@ -1,0 +1,20 @@
+
+/* Добавляем отступ для основного контента, чтобы не перекрывать его фиксированным элементом */
+main {
+    margin-top: 0vh; /* Отступ, равный высоте topside */
+}
+
+.custom-width {
+    width: 250px; /* Укажите необходимую ширину */
+}
+
+
+aside {
+    float: left;
+    width: 20vh;
+    padding: 2.5%;
+    height: 100vh;
+    background: #B0C4DE;
+    border-right: 5px solid #696969;
+    color: #000000
+}
