@@ -17,7 +17,7 @@ from django.apps import apps
 
 import csv
 import pandas as pd
-import datetime as dt
+import datetime
 
 # Create your views here.
 
@@ -72,7 +72,7 @@ class Expenses(View):
         categories = Category.objects.all()
         list_for_auth = UserExpenses.objects.filter(user=request.user.id)
         expenses_for_auth = list_for_auth.values_list('expense', flat=True)
-        today = dt.date.today()
+        today = datetime.date.today()
 
         if pk is None:
             if filter_category:
@@ -267,35 +267,27 @@ class FileExportImport(View):
                 raw_data = form.cleaned_data['csv_file']
                 decoded_file = raw_data.read().decode('utf-8').splitlines()
                 reader = csv.DictReader(decoded_file)
-                # for fields in reader:
-                #     file.append(fields)
-                #     print(file)
-                # return HttpResponse(file)  #("Файл успешно загружен и обработан!")
                 for fields in reader:
-                    category, created = Category.objects.get_or_create(name=fields['category'])
-                    file.append({'category': category.name, 'created': created})
-                print(file)
+                    fields['date'] = convert_date(fields['date'])
+                    fields['amount'] = fields['amount'].replace(',', '.')
+                    category, category_created = Category.objects.get_or_create(name__iexact=fields['category'].strip())
+                    expenses, expenses_created = Expense.objects.get_or_create(date=fields['date'],
+                                                                      category=category,
+                                                                      amount=fields['amount'],
+                                                                      desc=fields['desc'])
+                    expenses_user, expenses_user_created = UserExpenses.objects.get_or_create(user=request.user, expense=expenses)
+                    file.append({'date': expenses.date, 'category': expenses.category, 'amount': expenses.amount, 'desc': expenses.desc, 'created': expenses_created})
                 return HttpResponse(file)
             else:
                 form = UploadFileCSV()
             return render(request, 'tracker_app/expenses.html', {'csv_form': form})
 
 
+def convert_date(date_str):
+    if datetime.datetime.strptime(date_str,"%d.%m.%Y"):
+        from_str_to_date = datetime.datetime.strptime(date_str,"%d.%m.%Y").strftime("%Y-%m-%d")
+        return from_str_to_date
+    elif datetime.datetime.strptime(date_str, "%d-%m-%Y"):
+        from_str_to_date = datetime.datetime.strptime(date_str, "%d-%m-%Y").strftime("%Y-%m-%d")
+        return from_str_to_date
 
-#
-# # Представление для обработки загрузки
-# from django.http import HttpResponse
-#
-# def upload_file(request):
-#     if request.method == 'POST':
-#         form = UploadForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             uploaded_file = form.cleaned_data['file']
-#             # Чтение содержимого файла
-#             for line in uploaded_file:
-#                 decoded_line = line.decode('utf-8')  # Если файл в UTF-8
-#                 print(decoded_line)  # Здесь вы можете обработать строки, например, записать в базу данных.
-#             return HttpResponse("Файл успешно загружен и обработан!")
-#     else:
-#         form = UploadForm()
-#     return render(request, 'upload.html', {'form': form})
