@@ -15,4 +15,5 @@ urlpatterns = [
     path('category/<int:pk>', views.CategoryView.as_view(), name='category_edit'),
     path('export/csv/', views.FileExportImport().templatecsv, name='export_csv'),
     path('upload/csv/', views.FileExportImport().readcsv, name='upload_csv'),
+    path('export/excel/', views.FileExportImport().templatexcel, name='export_excel')
 ]

@@ -20,5 +20,5 @@ class CategoryForm(forms.ModelForm):
         fields = ['name', 'is_archive']
 
 
-class UploadFileCSV(forms.Form):
-    csv_file = forms.FileField(label='Upalod csv file')
+class UploadFile(forms.Form):
+    csv_file = forms.FileField(label='Upalod file')

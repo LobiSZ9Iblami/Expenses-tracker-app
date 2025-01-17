@@ -1,3 +1,4 @@
+from distutils.core import extension_keywords
 from http.client import responses
 from imghdr import test_webp
 from tokenize import Exponent
@@ -10,7 +11,7 @@ from django.template.context_processors import request
 from django.views import View
 from unicodedata import category
 
-from .forms import ExpensesForm, CategoryForm, UploadFileCSV
+from .forms import ExpensesForm, CategoryForm, UploadFile
 from .models import Expense, Category, UserExpenses
 from django.views.generic import CreateView
 from django.apps import apps
@@ -18,6 +19,8 @@ from django.apps import apps
 import csv
 import pandas as pd
 import datetime
+import openpyxl
+from io import StringIO
 
 # Create your views here.
 
@@ -261,11 +264,18 @@ class FileExportImport(View):
     def readcsv(self, request):
 
         if request.method == 'POST':
-            form = UploadFileCSV(request.POST, request.FILES)
-            file = []
+
+            form = UploadFile(request.POST, request.FILES)
+            file =[]
             if form.is_valid():
                 raw_data = form.cleaned_data['csv_file']
-                decoded_file = raw_data.read().decode('utf-8').splitlines()
+                extension_file = raw_data.name.split('.')[-1].lower()
+                if extension_file == 'xlsx':
+                    raw_data = convert_excel_into_csv(raw_data)
+                else:
+                    raw_data = raw_data.read().decode('utf-8')
+
+                decoded_file = raw_data.splitlines()
                 reader = csv.DictReader(decoded_file)
                 for fields in reader:
                     fields['date'] = convert_date(fields['date'])
@@ -279,15 +289,52 @@ class FileExportImport(View):
                     file.append({'date': expenses.date, 'category': expenses.category, 'amount': expenses.amount, 'desc': expenses.desc, 'created': expenses_created})
                 return HttpResponse(file)
             else:
-                form = UploadFileCSV()
+                form = UploadFile()
             return render(request, 'tracker_app/expenses.html', {'csv_form': form})
 
 
-def convert_date(date_str):
-    if datetime.datetime.strptime(date_str,"%d.%m.%Y"):
-        from_str_to_date = datetime.datetime.strptime(date_str,"%d.%m.%Y").strftime("%Y-%m-%d")
-        return from_str_to_date
-    elif datetime.datetime.strptime(date_str, "%d-%m-%Y"):
-        from_str_to_date = datetime.datetime.strptime(date_str, "%d-%m-%Y").strftime("%Y-%m-%d")
-        return from_str_to_date
+    def templatexcel(self, request):
+        fields = ['date', 'category', 'amount', 'desc']
 
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Expenses"
+        sheet.append(fields)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="expenses.xlsx"'
+
+        workbook.save(response)
+
+        return response
+
+def convert_excel_into_csv(file):
+    workbook = openpyxl.load_workbook(file)
+    sheet = workbook.active
+
+    output = []
+    for row in sheet.iter_rows(values_only=True):
+        output.append(row)
+
+    output_csv = StringIO()
+    writer = csv.writer(output_csv)
+    writer.writerows(output)
+    output_csv.seek(0)
+    return output_csv.getvalue()
+
+def convert_date(date_str):
+
+    formats = [
+        "%d.%m.%Y",
+        "%d-%m-%Y",
+        "%Y-%m-%d %H:%M:%S"
+    ]
+
+    for i in formats:
+        try:
+            from_str_to_date = datetime.datetime.strptime(date_str, i).strftime("%Y-%m-%d")
+            return from_str_to_date
+        except ValueError:
+            continue
+
+    return date_str
