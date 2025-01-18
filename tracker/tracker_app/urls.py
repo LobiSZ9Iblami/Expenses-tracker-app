@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 from users.urls import app_name
 from . import views
@@ -15,5 +15,5 @@ urlpatterns = [
     path('category/<int:pk>', views.CategoryView.as_view(), name='category_edit'),
     path('export/csv/', views.FileExportImport().templatecsv, name='export_csv'),
     path('upload/csv/', views.FileExportImport().readcsv, name='upload_csv'),
-    path('export/excel/', views.FileExportImport().templatexcel, name='export_excel')
+    path('export/excel/', views.FileExportImport().templatexcel, name='export_excel'),
 ]

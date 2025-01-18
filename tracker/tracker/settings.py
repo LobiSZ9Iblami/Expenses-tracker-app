@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tracker_app.apps.TrackerAppConfig',
     'users',
+    'dashboard',
 ]
 
 MIDDLEWARE = [

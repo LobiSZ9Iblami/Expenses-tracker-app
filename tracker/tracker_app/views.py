@@ -79,9 +79,9 @@ class Expenses(View):
 
         if pk is None:
             if filter_category:
-                exp_list = Expense.objects.filter(id__in=expenses_for_auth, category=filter_category)
+                exp_list = Expense.objects.filter(id__in=expenses_for_auth, category=filter_category).order_by("-date")
             else:
-                exp_list = Expense.objects.filter(id__in=expenses_for_auth)
+                exp_list = Expense.objects.filter(id__in=expenses_for_auth).order_by("-date")
             if filter_type == 'active':
                 exp_list = exp_list.filter(is_delete=False)
             elif filter_type == 'deleted':

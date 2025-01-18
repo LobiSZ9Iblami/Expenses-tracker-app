@@ -31,6 +31,8 @@ Expenses
 {% block body%}
     <h2>List of expenses</h2>
 
+    <a href="{% url 'dashboard:example_dashboard' %}">Dashboard</a>
+
     <form method="get">
        <label for="filter">Фильтр расходов:</label>
             <select  class="form-select custom-width" aria-label="Default select example" name="filter" id="filter" onchange="this.form.submit()">
