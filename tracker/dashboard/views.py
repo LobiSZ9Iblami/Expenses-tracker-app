@@ -1,14 +1,18 @@
 from django.shortcuts import render
 from tracker_app.models import Expense, UserExpenses
+from tracker_app.forms import ExpensesForm
+
 import plotly.express as px
 from django.db.models import F
 import pandas as pd
+from dash import html, dcc
 
 
 # Create your views here.
 
 def example_dashboard(request):
 
+    category_filter = ExpensesForm()
     user_expense_data = UserExpenses.objects.filter(user=request.user)
     expense_data = Expense.objects.filter(pk__in=user_expense_data.values_list('expense', flat=True)).annotate(category_name=F('category__name')).values("date", "amount", "category_name")
     # df = [
@@ -25,6 +29,9 @@ def example_dashboard(request):
     #     "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
     # })
 
+    if category_filter:
+        expense_data = expense_data.filter(category__in=category_filter)
+
     fig = px.bar(
         # df,
         expense_data,
@@ -35,8 +42,12 @@ def example_dashboard(request):
         barmode = "group"
     )
 
-    bar_dash = fig.to_html()
+    bar_dash = fig.to_html(
+        # html.Br(),
+        # html.Label('Multi-Select Dropdown'),
+        # dcc.Dropdown(expense_data[2], multi=True)
+    )
 
-    context = {'bar_dash': bar_dash}
+    context = {'bar_dash': bar_dash, 'category_filter_form': category_filter}
 
     return render(request, 'dashboard/expenses_example.html', context)
