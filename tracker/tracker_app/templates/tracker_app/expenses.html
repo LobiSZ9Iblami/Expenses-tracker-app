@@ -1,0 +1,94 @@
+{% extends 'users/base.html' %}
+
+
+{% block title %}
+Expenses
+{% endblock %}
+
+{% block export %}
+
+    <body>
+        <form action="{% url 'tracker:upload_csv' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ csv_form.as_p }}
+            <button type="submit" class="btn btn-primary" style="margin-right: 3px;">Upload</button>
+        </form>
+    </body>
+
+    <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            Download template
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <li><a class="dropdown-item" href="{% url 'tracker:export_csv' %}">CSV</a></li>
+            <li><a class="dropdown-item" href="{% url 'tracker:export_excel' %}">EXCEL</a></li>
+        </ul>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}
+
+{% block body%}
+    <h2>List of expenses</h2>
+
+    <a href="{% url 'dashboard:example_dashboard' %}">Dashboard</a>
+
+    <form method="get">
+       <label for="filter">Фильтр расходов:</label>
+            <select  class="form-select custom-width" aria-label="Default select example" name="filter" id="filter" onchange="this.form.submit()">
+                <option value="all" {% if filter_type == 'all' %}selected{% endif %}>Показать все расходы</option>
+                <option value="active" {% if filter_type == 'active' %}selected{% endif %}>Показать только активные</option>
+                <option value="deleted" {% if filter_type == 'deleted' %}selected{% endif %}>Показать только удалённые</option>
+            </select>
+
+       <label for="filter_category">Категория:</label>
+            <select class="form-select custom-width" name="filter_category" id="filter_category" onchange="this.form.submit()">
+                <option value="">Select Category</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == filter_category %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+       <label for="filter_category">Дата:</label>
+            <select class="form-select custom-width" name="filter_date" id="filter_date" onchange="this.form.submit()">
+                <option value="">Select Date</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == filter_category %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+    </form>
+
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr >
+                <th>Date</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in exp_list %}
+            <tr>
+                <td>{{ expense.date }}</td>
+                <td>{{ expense.category.name }}</td>
+                <td>{{ expense.amount }}</td>
+                <td>{{ expense.desc }}</td>
+                <td><a href="{% url 'tracker:edit_expense' pk=expense.pk %}">Edit</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+<form action="{% url 'tracker:create_expense' %}" method="post">
+    <h2>Create expense</h2>
+    {% csrf_token %}
+    {{ form.as_table }}
+    <p><button type="submit" name="action" value="create_expense">Create expense</button></p>
+</form>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'users/base.html' %}
+
+
+{% block title %}
+Edit category
+{% endblock %}
+
+
+
+{% block body%}
+<form method="post">
+    <h2>Edit category</h2>
+    {% csrf_token %}
+    {{ form.as_table }}
+    <p><button type="submit" name="action" value="edit_category">Save changes</button></p>
+</form>
+
+<form method="post" action="{% url 'tracker:category_edit' pk=categ.pk %}">
+    {% csrf_token %}
+    <p><button type="submit" name="action"  value="delete_category">Irretrievably delete</button></p>
+</form>
+
+<form method="post" action="{% url 'tracker:category_edit' pk=categ.pk %}">
+    {% csrf_token %}
+    <p><button type="submit" name="action" value="archive_category">Delete with archive</button></p>
+</form>
+{% endblock %}

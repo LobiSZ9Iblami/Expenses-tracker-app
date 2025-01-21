@@ -1,0 +1,11 @@
+{% extends 'users/base.html' %}
+
+{% block body %}
+<form method="GET" action="{% url 'dashboard:example_dashboard' %}">
+    {{ category_filter_form.category }}
+    <button>Submit</button>
+</form>
+
+    {{ bar_dash|safe }}
+
+{% endblock %}
