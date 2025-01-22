@@ -12,7 +12,7 @@ from dash import html, dcc
 
 def example_dashboard(request):
 
-    category_filter = ExpensesForm()
+    category_filter = request.GET.get('category')
     user_expense_data = UserExpenses.objects.filter(user=request.user)
     expense_data = Expense.objects.filter(pk__in=user_expense_data.values_list('expense', flat=True)).annotate(category_name=F('category__name')).values("date", "amount", "category_name")
     # df = [
@@ -31,6 +31,8 @@ def example_dashboard(request):
 
     if category_filter:
         expense_data = expense_data.filter(category__in=category_filter)
+    else:
+        expense_data
 
     fig = px.bar(
         # df,
@@ -48,6 +50,6 @@ def example_dashboard(request):
         # dcc.Dropdown(expense_data[2], multi=True)
     )
 
-    context = {'bar_dash': bar_dash, 'category_filter_form': category_filter}
+    context = {'bar_dash': bar_dash, 'category_filter_form': ExpensesForm()}
 
     return render(request, 'dashboard/expenses_example.html', context)
