@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'tracker_app.apps.TrackerAppConfig',
     'users',
     'dashboard',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

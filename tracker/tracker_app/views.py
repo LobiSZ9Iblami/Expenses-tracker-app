@@ -21,6 +21,7 @@ import pandas as pd
 import datetime
 import openpyxl
 from io import StringIO
+from rest_framework import generics
 
 # Create your views here.
 
@@ -338,3 +339,10 @@ def convert_date(date_str):
             continue
 
     return date_str
+
+
+
+class CategoryAPI(generics.ListAPIView):
+
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
